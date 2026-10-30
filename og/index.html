@@ -572,12 +572,24 @@ function renderSidebarUser() {
 }
 
 // handlePlay を安全にラップ
+// handlePlay を完全上書き（ログイン促しもアプリ内モーダル）
 (function safeHandlePlay() {
   const wait = setInterval(() => {
     if (!window.App || !App.handlePlay) return;
     clearInterval(wait);
     const orig = App.handlePlay.bind(App);
+
     App.handlePlay = async function(gameName, status) {
+      // 未ログイン時
+      if (!this.token && !localStorage.getItem('cm_auth_token')) {
+        if (window._appConfirm) {
+          window._appConfirm('プレイするにはログインが必要です。ログインしますか？', () => {
+            App.showLogin();
+          });
+        }
+        return;
+      }
+      // ログイン済み → 元の handlePlay を呼ぶ
       try {
         const backup = {};
         ['game-grid', 'category-bar'].forEach(id => {
@@ -628,7 +640,7 @@ function renderSidebarUser() {
         }
       }
     };
-    console.log('handlePlay wrapped (safe)');
+    console.log('handlePlay replaced (in-app login prompt)');
   }, 200);
   setTimeout(() => clearInterval(wait), 10000);
 })();
