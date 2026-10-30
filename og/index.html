@@ -383,9 +383,19 @@ const a0_0x23d7ed=a0_0x415e;function a0_0x415e(_0x230baf,_0x1d3783){_0x230baf=_0
   };
 
   // confirm を置き換え
-  const origConfirm = window.confirm;
+  // confirm をアプリ内モーダルに置き換え（ネイティブは一切出さない）
   window.confirm = function(message) {
-    return origConfirm.call(window, message);
+    const msg = String(message);
+    if (window._appConfirm) {
+      window._appConfirm(msg, () => {
+        // OK時の処理：ログイン促しならログインモーダルを開く
+        if (/login|ログイン/i.test(msg)) {
+          if (window.App && App.showLogin) App.showLogin();
+        }
+      });
+    }
+    // 同期APIのため常に false を返す（ネイティブダイアログ抑止）
+    return false;
   };
 
   // prompt を簡易置き換え
