@@ -323,11 +323,12 @@ const AppNav = {
 
 function cardHTML(g) {
   const title = String(g.title || g.name || 'ゲーム').replace(/'/g, "\\'");
+  const pkg = g.id || g.pkg || '';
   const icon = g.icon || g.icon_url || '';
   const cats = (g.categories || []).join(' · ') || 'ゲーム';
   return `
     <div class="card relative rounded-xl bg-[#18181f] border border-white/5 overflow-hidden cursor-pointer"
-         onclick="App.handlePlay('${title}', ${g.status})">
+         onclick="App.showGameDetails('${pkg}')">
       <div class="aspect-video relative" style="background:linear-gradient(135deg, rgba(139,92,246,.25), rgba(217,70,239,.15))">
         ${icon ? `<img src="${icon}" class="absolute inset-0 w-full h-full object-cover opacity-70" onerror="this.style.display='none'">` : ''}
         <div class="card-overlay absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
@@ -350,13 +351,14 @@ function fillHero() {
   const p = document.getElementById('hero-play');
   const h = document.getElementById('hero-area');
   const title = g.title || g.name || 'ゲーム';
+  const pkg = g.id || g.pkg || '';
   if (t) t.textContent = title;
   if (d) d.textContent = (g.categories || []).join(' · ') || 'ブラウザで即プレイ';
   if (p) {
     p.onclick = function(e) {
       e.preventDefault();
       e.stopPropagation();
-      App.handlePlay(String(title).replace(/'/g, "\\'"), g.status);
+      App.showGameDetails(pkg);
     };
   }
   if (h && (g.icon || g.icon_url)) {
@@ -374,10 +376,11 @@ function fillRanking() {
   grid.innerHTML = picks.map((g, i) => {
     const rankColor = i < 3 ? 'badge-rank' : 'bg-white/10';
     const title = String(g.title || g.name || 'ゲーム').replace(/'/g, "\\'");
+    const pkg = g.id || g.pkg || '';
     const icon = g.icon || g.icon_url || '';
     return `
       <div class="card rounded-xl bg-[#18181f] border border-white/5 overflow-hidden cursor-pointer"
-           onclick="App.handlePlay('${title}', ${g.status})">
+           onclick="App.showGameDetails('${pkg}')">
         <div class="aspect-video relative" style="background:linear-gradient(135deg, rgba(139,92,246,.25), rgba(217,70,239,.15))">
           ${icon ? `<img src="${icon}" class="absolute inset-0 w-full h-full object-cover opacity-60" onerror="this.style.display='none'">` : ''}
           <div class="absolute top-2 left-2 ${rankColor} text-white text-xs font-bold px-2 py-0.5 rounded">${i+1}</div>
@@ -457,7 +460,7 @@ function renderSidebarUser() {
   const box = document.getElementById('sidebar-user');
   const loginBtn = document.getElementById('sidebar-login-btn');
   if (!box || !loginBtn) return;
-  const token = localStorage.getItem('cm_token') || '';
+  const token = localStorage.getItem('cm_auth_token') || '';
   if (token) {
     box.innerHTML = `
       <div class="p-3 rounded-xl bg-white/5 border border-white/5">
@@ -595,7 +598,7 @@ const waitApp = setInterval(() => {
 setTimeout(() => clearInterval(waitApp), 10000);
 
 new MutationObserver(() => applyTitles()).observe(document.getElementById('game-grid'), { childList: true });
-setInterval(renderSidebarUser, 1500);
+setInterval(renderSidebarUser, 500);
 window.addEventListener('storage', renderSidebarUser);
 </script>
 </body>
