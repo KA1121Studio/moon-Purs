@@ -1340,15 +1340,125 @@
       bottom: min(100px, 8vh);
       transform: translateX(-50%);
     }
+      /* ===== 新UI風 上書き ===== */
+  body { background: #0b0d12 !important; }
+
+  /* フローティングボール → 紫グラデーション */
+  #floating-ball {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #8b5cf6, #d946ef) !important;
+    box-shadow: 0 4px 16px rgba(139,92,246,.6) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255,255,255,.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  #floating-ball img { display: none !important; }
+  #floating-ball::before {
+    content: '☾';
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  /* サイドバー → 新UI風 */
+  .sidebar {
+    background: #12141c !important;
+    border-left: 1px solid rgba(255,255,255,.05) !important;
+    gap: 0 !important;
+    padding: 1rem 0 !important;
+  }
+  .sidebar-button {
+    height: 3rem !important;
+    color: #e5e7eb !important;
+    font-size: .875rem !important;
+    font-weight: 600 !important;
+    padding: 0 1.25rem !important;
+    transition: background .2s !important;
+  }
+  .sidebar-button:hover {
+    background: rgba(139,92,246,.08) !important;
+    color: #c4b5fd !important;
+  }
+  .sidebar-button-btn {
+    background: #8b5cf6 !important;
+    border: 1px solid #8b5cf6 !important;
+    border-radius: 8px !important;
+    width: 3.5rem !important;
+    height: 1.75rem !important;
+    line-height: 1.6rem !important;
+    font-size: .75rem !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+  }
+  .sidebar-button-btn:hover { background: #7c3aed !important; }
+  .sidebar-div { color: #9ca3af !important; font-size: .75rem !important; }
+  .sidebar-div input {
+    background: #1e2831 !important;
+    border-radius: 6px !important;
+  }
+  .sidebar-overlay { background: rgba(0,0,0,.7) !important; backdrop-filter: blur(4px) !important; }
+
+  /* switch トグル */
+  .slider { background-color: #3a4150 !important; }
+  input:checked + .slider { background-color: #8b5cf6 !important; }
+
+  /* ローディング画面 → 新UI風 */
+  .loading {
+    background: #0b0d12 !important;
+  }
+  .loading p { color: #e5e7eb !important; font-family: 'Inter', sans-serif !important; }
+  .loading-progress {
+    background: rgba(139,92,246,.15) !important;
+    height: 8px !important;
+  }
+  .progress-bar {
+    background: linear-gradient(90deg, #8b5cf6, #d946ef) !important;
+  }
+  #step-msg { color: #9ca3af !important; font-size: .75rem !important; }
+
+  /* キーボードロック案内 */
+  .keyboard-lock {
+    background: rgba(139,92,246,.2) !important;
+    border: 1px solid rgba(139,92,246,.5) !important;
+    color: #fff !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  /* メニュー */
+  .menu { background: transparent !important; }
+
+  /* Enter Game ボタン（既に非表示だが念のため） */
+  .startGame { display: none !important; }
+
+  /* 入力欄 */
+  .input-div_input {
+    background: #1e2831 !important;
+    color: #fff !important;
+    border: 1px solid rgba(139,92,246,.4) !important;
+    opacity: 1 !important;
+  }
+  .input-div_input::placeholder { color: #6b7280 !important; }
+  .input-div_div_button { background: #8b5cf6 !important; }
+
+  /* 終了ボタン（既に赤だが微調整） */
+  #exit-app-btn {
+    background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 16px rgba(239,68,68,.6) !important;
+  }
   </style>
 </head>
 
 <body style="background:#000;margin:0;overflow:hidden" oncontextmenu="return false;">
   <div id="app" ref="containerDiv" class="container" v-cloak>
     
-    <div id="floating-ball" ref="floating-ball" class="floating-ball" v-show="!openMenu" :style="{ left: ballPosition.x + 'px', top: ballPosition.y + 'px' }" @mousedown.prevent="ballStart" @touchstart.prevent="ballStart">
-      <img src="./run-site/images/favicon.png" style="width: 40px;height: 40px;opacity: 0.75" :style="{ transform: iconRotate ? 'rotate(90deg)' : 'none' }" />
-    </div>
+ <div id="floating-ball" ref="floating-ball" class="floating-ball" v-show="!openMenu" :style="{ left: ballPosition.x + 'px', top: ballPosition.y + 'px' }" @mousedown.prevent="ballStart" @touchstart.prevent="ballStart">
+</div>
     
     <div id="menu" class="menu" :style="{'pointer-events': openMenu? 'auto' : 'none'}">
       <div v-if="openMenu" class="sidebar-overlay" @click="openMenu = false"></div>
