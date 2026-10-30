@@ -1735,6 +1735,58 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }, 150);
 });
+
+// ===== handleDCMessage をラップして時間切れを無視 =====
+(function ignoreTimeLimit() {
+  const wait = setInterval(() => {
+    if (!window.app || !app.handleDCMessage) return;
+    clearInterval(wait);
+
+    const orig = app.handleDCMessage.bind(app);
+    app.handleDCMessage = function(msg) {
+      try {
+        if (typeof msg === 'string') {
+          const parts = msg.split('>');
+          const type = parts[0];
+
+          // 時間切れ系のコマンドをブロック
+          const blockTypes = [
+            'timeout', 'expire', 'session_end', 'kick',
+            'time_up', 'limit', 'timeup', 'sessionend'
+          ];
+          if (blockTypes.includes(type)) {
+            console.log('[IGNORE] time limit message:', msg);
+            return;
+          }
+
+          // "msg>" の中に時間切れ系の文字列が含まれる場合もブロック
+          if (type === 'msg' && parts[1]) {
+            const body = parts[1].toLowerCase();
+            if (/timeout|expire|time\.?up|session\.?end|kick|limit/.test(body)) {
+              console.log('[IGNORE] time message in body:', msg);
+              return;
+            }
+          }
+        }
+      } catch(e) {
+        console.warn('[ignoreTimeLimit] parse error:', e);
+      }
+      return orig(msg);
+    };
+    console.log('[ignoreTimeLimit] handleDCMessage wrapped');
+  }, 200);
+  setTimeout(() => clearInterval(wait), 10000);
+})();
+
+// ===== サーバー強制切断の検知（コンソールログのみ） =====
+(function logPcClose() {
+  if (!window.RTCPeerConnection) return;
+  const origClose = RTCPeerConnection.prototype.close;
+  RTCPeerConnection.prototype.close = function() {
+    console.log('[PC CLOSE]', new Error().stack);
+    return origClose.apply(this, arguments);
+  };
+})();  
 </script>
 
 </body></html>
