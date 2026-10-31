@@ -400,13 +400,19 @@
     let pct = 0;
     let redirected = false;
 
-    const goMain = () => {
-      if (redirected) return;
-      redirected = true;
-      // クエリパラメータ（sid, game など）をそのまま引き継ぐ
-      const search = window.location.search || '';
-      window.location.href = './main.html' + search;
-    };
+const goMain = () => {
+  if (redirected) return;
+  redirected = true;
+
+  // iframe 内で動いている場合は親に完了通知
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage('cloudmoon-start-done', '*');
+  } else {
+    // 単体で開かれた場合は従来通り main.html へ
+    const search = window.location.search || '';
+    window.location.href = './main.html' + search;
+  }
+};
 
     const tick = () => {
       const speed = pct < 70 ? 2 + Math.random()*3 : 1 + Math.random()*1.6;
