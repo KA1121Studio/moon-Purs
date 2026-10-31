@@ -729,7 +729,10 @@ function a0_0x3150(_0x1d954b,_0x1da830){_0x1d954b=_0x1d954b-0x117;const _0x23cf3
       setTimeout(initIcons, 2500);
     });
     // ===== フルスクリーン時はUIを完全非表示（JS直接制御 + Vue監視） =====
+    // ===== フルスクリーン時はUIを完全非表示（Vueインスタンスを .__vue__ で取得） =====
     (function setupFullscreenHiding() {
+      let lastHide = null;
+
       const isBrowserFullscreen = () => !!(
         document.fullscreenElement ||
         document.webkitFullscreenElement ||
@@ -737,13 +740,23 @@ function a0_0x3150(_0x1d954b,_0x1da830){_0x1d954b=_0x1d954b-0x117;const _0x23cf3
         document.msFullscreenElement
       );
 
+      const getVue = () => {
+        const el = document.getElementById('app');
+        return (el && el.__vue__) ? el.__vue__ : null;
+      };
+
       const isVueFullscreen = () => {
-        try { return !!(window.app && window.app.isFullScreen); }
-        catch (e) { return false; }
+        const vm = getVue();
+        if (!vm) return false;
+        try { return !!vm.isFullScreen; } catch (e) { return false; }
       };
 
       const apply = () => {
         const hide = isBrowserFullscreen() || isVueFullscreen();
+        if (hide === lastHide) return;
+        lastHide = hide;
+
+        console.log('[FS hide]', hide, 'browser:', isBrowserFullscreen(), 'vue:', isVueFullscreen());
 
         const targets = [
           document.getElementById('sidebar-toggle-btn'),
@@ -769,8 +782,9 @@ function a0_0x3150(_0x1d954b,_0x1da830){_0x1d954b=_0x1d954b-0x117;const _0x23cf3
 
         document.body.classList.toggle('is-fullscreen', hide);
 
-        if (hide && window.app && typeof window.app.openMenu !== 'undefined') {
-          try { window.app.openMenu = false; } catch (e) {}
+        const vm = getVue();
+        if (hide && vm && typeof vm.openMenu !== 'undefined') {
+          try { vm.openMenu = false; } catch (e) {}
         }
       };
 
@@ -779,10 +793,15 @@ function a0_0x3150(_0x1d954b,_0x1da830){_0x1d954b=_0x1d954b-0x117;const _0x23cf3
       document.addEventListener('mozfullscreenchange', apply);
       document.addEventListener('MSFullscreenChange', apply);
 
-      // Vueの isFullScreen 変化やAPI未発火に備えて定期チェック
       setInterval(apply, 300);
-
       apply();
+
+      // デバッグ用：Vueインスタンスを確認
+      setTimeout(() => {
+        const vm = getVue();
+        console.log('[FS debug] Vue instance:', vm);
+        if (vm) console.log('[FS debug] isFullScreen:', vm.isFullScreen);
+      }, 2000);
     })();
   </script>
 </body>
