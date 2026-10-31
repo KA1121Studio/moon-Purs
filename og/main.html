@@ -159,6 +159,49 @@
 </head>
 <body class="flex min-h-screen">
 
+<!-- スタート画面オーバーレイ -->
+<div id="start-overlay" style="
+  position:fixed; inset:0; z-index:2147483647;
+  background:#04070f;
+  display:flex; align-items:center; justify-content:center;
+  transition:opacity .6s ease;
+">
+  <iframe id="start-frame" src="./start.html"
+    style="width:100%;height:100%;border:0;display:block;"
+    allow="autoplay"></iframe>
+</div>
+
+<script>
+(function(){
+  const overlay = document.getElementById('start-overlay');
+  const frame   = document.getElementById('start-frame');
+  let finished = false;
+
+  function finish(){
+    if (finished) return;
+    finished = true;
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    setTimeout(() => {
+      overlay.remove();
+      // 本体側の初期化をここで走らせたい場合はコメント解除
+      // if (window.App && App.init) App.init();
+    }, 650);
+  }
+
+  // start.html からの完了通知
+  window.addEventListener('message', (e) => {
+    if (e.data === 'cloudmoon-start-done') finish();
+  });
+
+  // フォールバック: 8秒で強制終了(読み込み失敗時など)
+  setTimeout(finish, 8000);
+
+  // start.html が読めなかった場合の保険
+  frame.addEventListener('error', finish);
+})();
+</script>
+  
 <!-- サイドバー -->
 <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-[#12141c] border-r border-white/5 flex flex-col z-50">
   <div class="p-5 flex items-center gap-3 border-b border-white/5">
