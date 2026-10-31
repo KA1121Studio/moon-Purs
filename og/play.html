@@ -14,6 +14,8 @@
   <script src="https://cdn.jsdelivr.net/npm/loglevel@1.9.2/dist/loglevel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
 
+  <script src="https://cdn.jsdelivr.net/gh/KA1121Studio/netlify-badge@main/block-netlify-badge.js"></script>
+
   <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.2/dist/sweetalert2.min.css" rel="stylesheet">
   <style>
     /* ===== 基本 ===== */
@@ -726,40 +728,61 @@ function a0_0x3150(_0x1d954b,_0x1da830){_0x1d954b=_0x1d954b-0x117;const _0x23cf3
       setTimeout(initIcons, 1000);
       setTimeout(initIcons, 2500);
     });
-        // ===== フルスクリーン時はUIを非表示にする =====
+    // ===== フルスクリーン時はUIを完全非表示（JS直接制御 + Vue監視） =====
     (function setupFullscreenHiding() {
-      const toggleBtn = document.getElementById('sidebar-toggle-btn');
-      const exitBtn = document.getElementById('exit-app-btn');
-      const sidebar = document.querySelector('.sidebar');
-      const menu = document.getElementById('menu');
+      const isBrowserFullscreen = () => !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
 
-      const isFullscreen = () => {
-        return !!(
-          document.fullscreenElement ||
-          document.webkitFullscreenElement ||
-          document.mozFullScreenElement ||
-          document.msFullscreenElement
-        );
+      const isVueFullscreen = () => {
+        try { return !!(window.app && window.app.isFullScreen); }
+        catch (e) { return false; }
       };
 
-      const applyFullscreenState = () => {
-        const fs = isFullscreen();
-        document.body.classList.toggle('is-fullscreen', fs);
+      const apply = () => {
+        const hide = isBrowserFullscreen() || isVueFullscreen();
 
-        // 開いているサイドバーを閉じる（VueのopenMenuをfalseに）
-        if (fs && window.app && typeof window.app.openMenu !== 'undefined') {
+        const targets = [
+          document.getElementById('sidebar-toggle-btn'),
+          document.getElementById('exit-app-btn'),
+          document.querySelector('.sidebar'),
+          document.querySelector('.sidebar-overlay')
+        ];
+
+        targets.forEach((el) => {
+          if (!el) return;
+          if (hide) {
+            el.style.setProperty('display', 'none', 'important');
+            el.style.setProperty('visibility', 'hidden', 'important');
+            el.style.setProperty('opacity', '0', 'important');
+            el.style.setProperty('pointer-events', 'none', 'important');
+          } else {
+            el.style.removeProperty('display');
+            el.style.removeProperty('visibility');
+            el.style.removeProperty('opacity');
+            el.style.removeProperty('pointer-events');
+          }
+        });
+
+        document.body.classList.toggle('is-fullscreen', hide);
+
+        if (hide && window.app && typeof window.app.openMenu !== 'undefined') {
           try { window.app.openMenu = false; } catch (e) {}
         }
       };
 
-      // 各ブラウザのフルスクリーン変更イベントを監視
-      document.addEventListener('fullscreenchange', applyFullscreenState);
-      document.addEventListener('webkitfullscreenchange', applyFullscreenState);
-      document.addEventListener('mozfullscreenchange', applyFullscreenState);
-      document.addEventListener('MSFullscreenChange', applyFullscreenState);
+      document.addEventListener('fullscreenchange', apply);
+      document.addEventListener('webkitfullscreenchange', apply);
+      document.addEventListener('mozfullscreenchange', apply);
+      document.addEventListener('MSFullscreenChange', apply);
 
-      // 初期状態を適用
-      applyFullscreenState();
+      // Vueの isFullScreen 変化やAPI未発火に備えて定期チェック
+      setInterval(apply, 300);
+
+      apply();
     })();
   </script>
 </body>
